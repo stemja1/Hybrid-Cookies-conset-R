@@ -1,57 +1,45 @@
 <?php
 /**
- * Spustí sa pri odstránení pluginu.
+ * Vyčistenie pri odstránení pluginu.
+ *
+ * Dôležité: tabuľky sa mažú IBA vtedy, keď si to používateľ výslovne
+ * nastavil. Log súhlasov je doklad o splnení GDPR, takže jeho zmazanie
+ * bez súhlasu majiteľa webu by bolo protiprávne.
  *
  * @package HybridCookies
  */
+
+declare( strict_types=1 );
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-/**
- * Odstráni tabuľky a nastavenia pluginu.
- */
-function hcc_uninstall() {
-	global $wpdb;
-
-	$option = get_option( 'hcc_delete_on_uninstall', '0' );
-
-	// Bez explicitného súhlasu necháme dáta vo WordPresse.
-	if ( '1' !== (string) $option ) {
-		return;
-	}
-
-	$tables = array(
-		$wpdb->prefix . 'hcc_cookies',
-		$wpdb->prefix . 'hcc_consent_log',
-	);
-
-	foreach ( $tables as $table ) {
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
-		$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
-	}
-
-	$options = array(
-		'hcc_enabled',
-		'hcc_banner_position',
-		'hcc_modal',
-		'hcc_show_on_login',
-		'hcc_show_on_mobile',
-		'hcc_consent_expiry_days',
-		'hcc_geo_targeting',
-		'hcc_reject_all',
-		'hcc_categories_enabled',
-		'hcc_delete_on_uninstall',
-		'hcc_script_mode',
-		'hcc_block_patterns',
-		'hcc_custom_css',
-		'hcc_version',
-		'hcc_defaults_imported',
-	);
-
-	foreach ( $options as $name ) {
-		delete_option( $name );
-	}
+if ( ! defined( 'HCC_VERSION' ) ) {
+	define( 'HCC_VERSION', '0.1.0' );
 }
-hcc_uninstall();
+
+$hcc_autoload = __DIR__ . '/vendor/autoload.php';
+
+if ( is_readable( $hcc_autoload ) ) {
+	require_once $hcc_autoload;
+} else {
+	require_once __DIR__ . '/includes/autoload-fallback.php';
+}
+
+if ( ! \HCC\Options::get( 'delete_data_on_uninstall' ) ) {
+	// Používateľ si nechal dáta zachovať — končíme.
+	return;
+}
+
+foreach ( \HCC\Tables::all() as $hcc_table ) {
+	// Názov tabuľky pochádza z `Tables::all()`, nie od používateľa.
+	// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery
+	$wpdb->query( 'DROP TABLE IF EXISTS `' . $hcc_table . '`' );
+}
+
+\HCC\Options::delete_all();
+\HCC\Capabilities::remove();
+
+delete_option( 'hcc_version' );
+delete_transient( 'hcc_default_banner' );

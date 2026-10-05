@@ -1,0 +1,23 @@
+/*!
+ * Hybrid Cookies conset R+ — admin štýly
+ * Načítavajú sa priamo cez wp_enqueue_style, bez build kroku.
+ */
+
+.hcc-admin {
+	max-width: 1200px;
+}
+
+.hcc-app {
+	margin-top: 1rem;
+	min-height: 320px;
+}
+
+.hcc-app__loading {
+	color: #646970;
+	font-style: italic;
+}
+
+/* Odkaz na Nastavenia v zozname pluginov */
+.hcc-admin-links a {
+	margin-right: 0.5rem;
+}

@@ -1,22 +1,32 @@
+# Git
+/.github/CODE_STYLE.md.bak
+
 # Build artefakty
-vendor/
-node_modules/
-dist/
-build/
+/vendor/
+/node_modules/
+/admin/ui/dist/
+/build/
+/dist/
+
+# ZIP balíky pre WordPress.org
 *.zip
-*.tar.gz
 
 # Testy a reporty
-coverage/
-phpunit.xml
+/coverage/
 .phpunit.result.cache
-phpcs.xml
-phpstan.neon
+/phpcs.xml
+/phpstan.neon
 
-# Lokálne
+# Lokálne prostredie
 *.log
 *.cache
+.env
+.env.local
+
+# OS / IDE
 .DS_Store
 Thumbs.db
 .idea/
 .vscode/
+*.swp
+*.swo

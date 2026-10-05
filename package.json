@@ -1,22 +1,28 @@
 {
-  "name": "stemja1/hybrid-cookies-conset-r-plus",
+  "name": "hybrid-cookies-conset-r-plus",
+  "version": "0.1.0",
   "description": "Consent banner, katalóg cookies a blokovanie trackovacích skriptov pre WordPress.",
-  "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
-  "keywords": [
-    "wordpress",
-    "wordpress-plugin",
-    "cookie",
-    "cookie-consent",
-    "gdpr",
-    "consent-banner"
-  ],
-  "require": {
-    "php": ">=7.4"
-  },
+  "private": true,
   "scripts": {
-    "lint:php": "find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l",
-    "lint:js": "find ./assets -name '*.js' -print0 | xargs -0 -n1 node --check",
-    "lint:css": "npx --yes stylelint 'assets/css/**/*.css'"
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js admin/ui/src modules public",
+    "lint:css": "wp-scripts lint-style \"assets/css/**/*.css\" \"admin/ui/src/**/*.scss\"",
+    "format": "wp-scripts format admin/ui/src modules public",
+    "packages-update": "wp-scripts packages-update"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.7.0"
+  },
+  "dependencies": {
+    "@wordpress/api-fetch": "^7.21.0",
+    "@wordpress/components": "^29.4.0",
+    "@wordpress/data": "^10.21.0",
+    "@wordpress/element": "^6.21.0",
+    "@wordpress/i18n": "^5.21.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0"
   }
 }

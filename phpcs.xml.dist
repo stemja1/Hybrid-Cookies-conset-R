@@ -1,23 +1,50 @@
 <?xml version="1.0"?>
 <ruleset name="Hybrid Cookies conset R+">
-	<description>Coding standards for the Hybrid Cookies conset R+ plugin.</description>
+
+	<description>Coding standards pre plugin Hybrid Cookies conset R+.</description>
 
 	<file>.</file>
 
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>/admin/ui/dist/*</exclude-pattern>
 
 	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
 	<arg value="sp"/>
 
+	<config name="minimum_wp_version" value="6.4"/>
+	<config name="testVersion" value="8.1-"/>
+
+	<!--
+		WordPress Coding Standards.
+		Filtrácia názvov súborov je vypnutá, pretože používame PSR-4
+		autoloading: názov súboru musí byť zhodný s názvom triedy
+		(napr. `Consent_Module.php` pre `HCC\Modules\Consent\Consent_Module`).
+	-->
 	<rule ref="WordPress">
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
 		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
 	</rule>
 
-	<config name="minimum_wp_version" value="6.0"/>
-	<config name="testVersion" value="7.4-"/>
+	<!-- Prefix všetkých globalnych symbolov -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="hcc"/>
+				<element value="HCC"/>
+			</property>
+		</properties>
+		<!--
+			`hcc` má 3 znaky, WPCS by odporúčalo aspoň 4. Prefix je daný
+			názvom pluginu a zhoduje sa s REST namespace `hcc/v1` a
+			prefixom tabuliek `{prefix}hcc_*`, takže ho ponechávame.
+		-->
+		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed"/>
+	</rule>
 
+	<!-- Text domain je povinny -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
@@ -26,12 +53,13 @@
 		</properties>
 	</rule>
 
-	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
-		<properties>
-			<property name="prefixes" type="array">
-				<element value="hcc"/>
-				<element value="HCC"/>
-			</property>
-		</properties>
-	</rule>
+	<!-- PHP 8.1 kompatibilita (kontraktuje s testVersion vyššie) -->
+	<rule ref="PHPCompatibilityWP"/>
+
+	<!-- striktné typy vyžadujeme všade -->
+	<config name="php_version" value="80100"/>
+
+	<!-- Zákaz tichých chýb (@) -->
+	<rule ref="Generic.PHP.NoSilencedErrors.Discouraged"/>
+
 </ruleset>

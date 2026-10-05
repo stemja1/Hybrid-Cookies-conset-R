@@ -27,8 +27,9 @@
   },
   "autoload": {
     "psr-4": {
-      "HCC\\": "includes/",
-      "HCC\\Modules\\": "modules/"
+      "HCC\\Admin\\": "admin/",
+      "HCC\\Modules\\": "modules/",
+      "HCC\\": "includes/"
     }
   },
   "autoload-dev": {
