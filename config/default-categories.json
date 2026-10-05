@@ -1,0 +1,46 @@
+{
+  "necessary": {
+    "name": { "en_US": "Necessary", "sk_SK": "Nevyhnutné" },
+    "description": {
+      "en_US": "Required for the website to function. These cookies enable core features such as security, network management and accessibility. They cannot be disabled.",
+      "sk_SK": "Nevyhnutné pre fungovanie webu. Tieto cookies umožňujú základné funkcie ako bezpečnosť, správu siete a prístupnosť. Nemožno ich vypnúť."
+    },
+    "is_necessary": true,
+    "sell_personal_data": false,
+    "sort_order": 10,
+    "locked": true
+  },
+  "functional": {
+    "name": { "en_US": "Functional", "sk_SK": "Funkčné" },
+    "description": {
+      "en_US": "These cookies remember your preferences, such as language or region, so the website works the way you like. For example, they store your language choice or whether you are logged in.",
+      "sk_SK": "Tieto cookies si pamätajú vaše nastavenia, napríklad jazyk alebo región, aby web fungoval tak, ako vám to vyhovuje. Ukladajú napríklad zvolený jazyk alebo či ste prihlásení."
+    },
+    "is_necessary": false,
+    "sell_personal_data": false,
+    "sort_order": 20,
+    "locked": false
+  },
+  "statistics": {
+    "name": { "en_US": "Statistics", "sk_SK": "Štatistické" },
+    "description": {
+      "en_US": "These cookies collect anonymous information about how visitors use the website. This data helps us understand which pages are popular and where improvements are needed.",
+      "sk_SK": "Tieto cookies zbierajú anonymné informácie o tom, ako návštevníci používajú web. Údaje nám pomáhajú porozumieť, ktoré stránky sú obľúbené a kde treba zlepšenia."
+    },
+    "is_necessary": false,
+    "sell_personal_data": false,
+    "sort_order": 30,
+    "locked": false
+  },
+  "marketing": {
+    "name": { "en_US": "Marketing", "sk_SK": "Marketingové" },
+    "description": {
+      "en_US": "These cookies are used to track visitors across websites to show relevant ads and marketing communications, and to measure how effective advertising is.",
+      "sk_SK": "Tieto cookies sledujú návštevníkov naprieč webmi na zobrazovanie relevantných reklám, na meranie ich účinnosti a na remarketing."
+    },
+    "is_necessary": false,
+    "sell_personal_data": true,
+    "sort_order": 40,
+    "locked": false
+  }
+}

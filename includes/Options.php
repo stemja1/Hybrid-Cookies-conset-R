@@ -180,6 +180,13 @@ class Options {
 		foreach ( $values as $key => $value ) {
 			self::update( $key, $value );
 		}
+
+		/**
+		 * Action po uložení nastavení.
+		 *
+		 * @param array<string,mixed> $values Uložené hodnoty.
+		 */
+		do_action( 'hcc_options_updated', $values );
 	}
 
 	/**

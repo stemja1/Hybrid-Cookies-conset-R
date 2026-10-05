@@ -90,6 +90,12 @@ final class Plugin {
 
 		$this->booted = true;
 
+		// `config/regions.php` nie je v Composer `files` autoloade — načítame ho
+		// až tu, aby `apply_filters()` mal k dispozíci ostatné pluginy.
+		if ( ! function_exists( 'hcc_get_regions' ) ) {
+			require_once HCC_PLUGIN_DIR . '/config/regions.php';
+		}
+
 		$this->registry->load();
 		$this->i18n->register();
 		$this->admin->register();

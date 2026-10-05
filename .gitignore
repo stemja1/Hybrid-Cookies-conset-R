@@ -7,6 +7,8 @@
 /admin/ui/dist/
 /build/
 /dist/
+/.phpunit.cache/
+/.phpunit.result.cache
 
 # ZIP balíky pre WordPress.org
 *.zip

@@ -19,8 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Modul kategórií.
  *
  * Kategórie (nevyhnutné / funkčné / štatistické / marketingové) sú základ
- * GDPR súhlasu. V MVP sú tieto moduly zatiaľ registre — implementácia
- * CRUD príde v Sesii 2.
+ * GDPR súhlasu. Modul vlastní repozitár a seeder predvolených hodnôt.
  */
 class Categories_Module extends Abstract_Module {
 
@@ -30,6 +29,20 @@ class Categories_Module extends Abstract_Module {
 	 * @var int
 	 */
 	protected int $priority = 5;
+
+	/**
+	 * Repozitár kategórií.
+	 *
+	 * @var Categories_Repository|null
+	 */
+	private ?Categories_Repository $repository = null;
+
+	/**
+	 * Seeder predvolených kategórií.
+	 *
+	 * @var Categories_Seeder|null
+	 */
+	private ?Categories_Seeder $seeder = null;
 
 	/**
 	 * Vráti slug modulu.
@@ -55,7 +68,41 @@ class Categories_Module extends Abstract_Module {
 	 * @return void
 	 */
 	public function register(): void {
-		// TODO (Sesia 2): načítať kategórie do databázy pri aktivácii
-		// a poskytnúť REST endpointy na ich CRUD.
+		add_action( 'hcc_activated', array( $this, 'on_activated' ) );
+	}
+
+	/**
+	 * Založí predvolené kategórie pri aktivácii pluginu.
+	 *
+	 * @return void
+	 */
+	public function on_activated(): void {
+		$this->get_seeder()->seed();
+	}
+
+	/**
+	 * Vráti repozitár kategórií.
+	 *
+	 * @return Categories_Repository
+	 */
+	public function get_repository(): Categories_Repository {
+		if ( null === $this->repository ) {
+			$this->repository = new Categories_Repository();
+		}
+
+		return $this->repository;
+	}
+
+	/**
+	 * Vráti seeder.
+	 *
+	 * @return Categories_Seeder
+	 */
+	public function get_seeder(): Categories_Seeder {
+		if ( null === $this->seeder ) {
+			$this->seeder = new Categories_Seeder( $this->get_repository() );
+		}
+
+		return $this->seeder;
 	}
 }

@@ -143,6 +143,52 @@ add_filter(
 );
 ```
 
+## Konfigurácia
+
+### Regióny a zákony
+
+`config/regions.php` mapuje krajinu na región, región určuje typ súhlasu
+(`optin` / `optout`) a zákon. Predvolene je pokrytých 40 krajín v 8 regiónoch:
+
+| Región | Krajiny (výber) | Typ súhlasu | Zákon |
+| --- | --- | --- | --- |
+| `eu` | EÚ 27 + SK, DE, FR… | `optin` | GDPR |
+| `uk` | GB | `optin` | UK GDPR |
+| `ch` | CH | `optin` | FADP |
+| `us` | US | `optout` | CCPA |
+| `br` | BR | `optin` | LGPD |
+| `ca` | CA | `optin` | PIPEDA |
+| `jp` | JP | `optin` | APPI |
+| `au` | AU | `optin` | Privacy Act |
+| `generic` | všetky ostatné | `optin` | GENERIC |
+
+Rozlíšenie `optin` / `optout` je právne podstatné: v EÚ musí návštevník
+súhlas **udeliť**, v USA stačí, že ho **neodmietne**. Banner musí byť
+nastavený podľa regiónu, nie univerzálne.
+
+Mapa sa dá meniť cez filter `hcc_regions`, regióny cez
+`hcc_region_definitions`.
+
+### Kategórie
+
+`config/default-categories.json` obsahuje štyri kategórie v oboch jazykoch
+naraz (`en_US`, `sk_SK`), takže seedovanie funguje bez ohľadu na jazyk webu.
+Kategória `necessary` je chránená — nedá sa prehodiť na dobrovoľnú ani zmazať.
+
+### Katalóg cookies
+
+`config/default-cookies.json` obsahuje 45 najbežnejších cookies
+(Google Analytics, Meta Pixel, YouTube, Hotjar, TikTok, Stripe…) a
+`modules/Blocker/data/known-cookies.json` 63 URL patternov poskytovateľov
+skriptov.
+
+`Script_Catalog` pri vyhľadávaní vyberá **najdlhší** zhodný pattern, takže
+`googletagmanager.com/ns.html` vyhráva pred `googletagmanager.com`. Prázdne
+patterny a neznáme kategórie sú zahodené — pattern `''` by zablokoval celý web
+a neznáma kategória by spôsobila, že by sa cookie nikdy neodblokovala.
+
+Katalóg je cachovaný v transiente `hcc_script_providers` na 12 hodín.
+
 ## Databáza
 
 Všetky tabuľky používajú prefix `{wp_prefix}hcc_` a sú vytvorené cez `dbDelta()`.
@@ -173,15 +219,33 @@ v `Options::get_schema()`.
 composer install          # dev závislosti (phpcs, phpunit, WPCS)
 composer lint             # phpcs — WordPress Coding Standards
 composer lint:fix         # phpcbf — automatická oprava
-composer test             # PHPUnit (vyžaduje wp-phpunit)
+composer test             # PHPUnit — unit testy bez databázy
 
 npm install
 npm run build             # admin/ui/src → admin/ui/dist
 npm run start             # dev build s watch
 ```
 
-GitHub Actions (`.github/workflows/php.yml`) spúšťa `php -l`, PHPCS
-a `PHPCompatibility` pre PHP 8.1 a 8.3 pri každom pushu na `main`.
+GitHub Actions (`.github/workflows/php.yml`) pri každom pushu na `main` spúšťa:
+
+* `php -l` na všetkých PHP súboroch (PHP 8.1 aj 8.3)
+* PHPCS — WordPress Coding Standards + PHPCompatibility
+* `composer validate --strict`
+* PHPUnit — unit testy
+
+### Testovanie bez WordPressu
+
+`tests/stubs.php` definuje minimálne stuby WordPress funkcií
+(`get_transient()`, `apply_filters()`, `sanitize_key()`…), takže čisté triedy
+sa dajú testovať bez databázy a bez WP inštalácie:
+
+```bash
+vendor/bin/phpunit              # všetky testy
+vendor/bin/phpunit --testdox   # s popiskami testov
+```
+
+Kryté sú `Script_Catalog` (normalizácia, zhoda patternov, filtery) a
+`hcc_get_regions()` (mapovanie krajín, typy súhlasu).
 
 ## Licencia
 

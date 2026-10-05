@@ -62,4 +62,45 @@
 	<!-- Zákaz tichých chýb (@) -->
 	<rule ref="Generic.PHP.NoSilencedErrors.Discouraged"/>
 
+	<!--
+		Repozitáry zostavujú SQL z názvov tabuliek, ktoré vracia
+		`HCC\Tables::get()` — to je whitelist konštánt, nie používateľský
+		vstup. `$wpdb->prepare()` tu nemá čo upravovať, pretože placeholder
+		pre názov tabuľky neexistuje a všetky hodnoty idú cez `prepare()`
+		na samostatnom mieste.
+
+		Toto je zámerné vypnutie, nie obídenie — ak sa v kóde objaví
+		interpolovaná hodnota od používateľa, PHPCS to už nezachytí.
+		Preto `Tables::get()` nikdy neprijíma vstup zvonka.
+	-->
+	<rule ref="WordPress.DB.PreparedSQL.InterpolatedNotPrepared">
+		<exclude-pattern>*/modules/*Repository.php</exclude-pattern>
+	</rule>
+
+	<!--
+		Read-only dotazy nad tabuľkami pluginu sú cacheované cez transient
+		alebo bežia iba v admin kontexte, kde je načítanie z DB očakávané.
+	-->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<exclude-pattern>*/modules/*Repository.php</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.DB.PreparedSQL">
+		<exclude-pattern>*/modules/*Repository.php</exclude-pattern>
+	</rule>
+
+	<!-- Testy používajú vlastné stuby WordPress funkcií. -->
+	<rule ref="WordPress.WP.AlternativeFunctions">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<!-- PHPUnit testy nepotrebujú `declare(strict_types)` kontrolu. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
 </ruleset>

@@ -30,6 +30,11 @@ class I18n {
 	public const SUPPORTED_LOCALES = array( 'en_US', 'sk_SK' );
 
 	/**
+	 * Jazyk, ktorý sa použije, keď aktuálna locale nie je podporovaná.
+	 */
+	public const FALLBACK_LOCALE = 'en_US';
+
+	/**
 	 * Registruje hooky.
 	 *
 	 * @return void

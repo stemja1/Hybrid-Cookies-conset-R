@@ -36,5 +36,11 @@ $hcc_composer_autoload = HCC_PLUGIN_DIR . '/vendor/autoload.php';
 if ( is_readable( $hcc_composer_autoload ) ) {
 	require_once $hcc_composer_autoload;
 } else {
-	require_once __DIR__ . '/autoload-fallback.php';
+	require_once __DIR__ . '/../autoload-fallback.php';
+}
+
+// `config/regions.php` nie je súčasťou Composer autoloadu — aktivácia
+// potrebuje mapu regiónov ešte pred `Plugin::boot()`.
+if ( ! function_exists( 'hcc_get_regions' ) ) {
+	require_once HCC_PLUGIN_DIR . '/config/regions.php';
 }
