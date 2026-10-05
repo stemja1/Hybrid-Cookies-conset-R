@@ -59,7 +59,12 @@ admin/
 modules/
   Categories/                      Kategórie súhlasu — repository, seeder
   Cookies/                         Katalóg cookies — repository, seeder
-  Blocker/                         Katalóg poskytovateľov skriptov
+  Blocker/
+    Script_Catalog.php             Katalóg poskytovateľov skriptov
+    Blocker_Config.php             Konfigurácia pre frontend
+    Blocker_Module.php             Enqueue do `<head>` s prioritou 0
+    data/known-cookies.json        63 URL patternov
+    js/blocker.js                  Auto-blocking (MutationObserver)
   Consent/                         Cookie, recorder, región, REST controller
   Banner/                          Consent banner (Sesia 5)
 
@@ -113,8 +118,6 @@ Priority (`$priority`) určuje poradie načítania — čím nižšie, tým skô
 | `hcc_consent_recorded` | Návštevník udelil súhlas (uuid, riadok v tabuľke, payload) |
 | `hcc_frontend_consent_saved` | Súhlas uložený z frontendu (payload, uuid) |
 | `hcc_region_resolved` | Určený región (efektívny, pred filtrom, krajina) |
-| `hcc_before_block` | Skript sa blokuje |
-| `hcc_after_unblock` | Skript sa odblokoval |
 | `hcc_cookie_updated` | Katalóg cookies sa zmenil |
 | `hcc_banner_saved` | Konfigurácia bannera sa uložila |
 
@@ -132,6 +135,8 @@ Priority (`$priority`) určuje poradie načítania — čím nižšie, tým skô
 | `hcc_geoip_country` | Kód krajiny z GeoIP (predvolene sa nepoužíva) |
 | `hcc_region_to_country` | Namapovanie regiónu na krajinu pre režim `manual` |
 | `hcc_consent_expiry_days` | Doba platnosti cookie súhlasu |
+| `hcc_blocker_config` | Konfigurácia frontendu (cookie, granted, patterns, nonce) |
+| `hcc_blocker_debug` | `true` zapne debug výpis do konzoly |
 | `hcc_locale` | Prepnutie locale |
 
 Príklad doplnenia vlastného poskytovateľa:
@@ -210,6 +215,80 @@ Všetky tabuľky používajú prefix `{wp_prefix}hcc_` a sú vytvorené cez `dbD
 
 Nastavenia idú do `wp_options` s prefixom `hcc_` a sú validované cez schému
 v `Options::get_schema()`.
+
+## Blokovanie skriptov
+
+### Ako to funguje
+
+`blocker.js` sa vypíše do `<head>` s prioritou `wp_head: 0` — teda pred
+akýmkoľvek skriptom tretej strany. Konfigurácia (`window.hccBlockerConfig`)
+mu príde ako inline skript ešte pred ním.
+
+Súběžne bežia tri režimy:
+
+1. **`document.createElement` je prekrytý.** Zachytí skripty, ktoré si vytvárajú
+   pluginy počas behu — chat widgety, analytics, A/B testy. Zachytáva
+   `node.src = …` aj `node.setAttribute('src', …)`.
+2. **`MutationObserver`** na `document.documentElement` s `subtree: true`.
+   Zachytí skripty vložené cez `innerHTML` alebo priamo serverovým výstupom.
+3. **Prehľad existujúcich uzlov** pri `DOMContentLoaded` na `script[src]` aj
+   `iframe[src]`.
+
+Žiadne manuálne tagovanie `data-category` na skriptoch a žiadne integračné
+adaptery pre konkrétne pluginy — to je hlavný rozdiel oproti Complianz.
+
+### Ako sa blokuje
+
+`<script>` dostane `type="text/plain"` (pôvodný `type` sa uloží do
+`data-hcc-original-type`). `<iframe>` dostane odstránený `src` (pôvodný v
+`data-hcc-original-src`). Uzol zostáva v DOM, takže ho vieme nahradiť bez toho,
+aby sme museli zisťovať jeho pozíciu nanovo.
+
+Kategórie `necessary` sa neblokujú nikdy, ani bez súhlasu.
+
+### Odblokovanie
+
+Po súhlase sa uzol **nahradí novým**, nie iba vráti pôvodný `type`. Prehliadače
+s už načítaným prvkom v cache by obnovenie `type` nenačítalo znova. Pôvodné
+atribúty sa prenášajú okrem `data-hcc*` a nášho `type`/`src`.
+
+Vyvolá sa event `hcc:category-enabled` s `{ category, restored }`.
+
+### Verejné API
+
+```js
+window.hccConsent.hasConsent( 'marketing' );  // boolean
+window.hccConsent.getGranted();               // ['necessary', 'statistics']
+window.hccConsent.getBlocked();               // [{ src, category }]
+window.hccConsent.save( [ 'necessary', 'marketing' ] );
+window.hccConsent.revoke();
+```
+
+`save()` pošle súhlas na REST, odblokuje uzly a vyvolá eventy. `revoke()`
+odvolá súhlas — plugin prepíše banner, aby návštevník ho videl znova.
+
+### Events
+
+| Event | Kedy |
+| --- | --- |
+| `hcc:ready` | Bloker je aktívny |
+| `hcc:before-block` | Skript sa práve zablokoval |
+| `hcc:after-unblock` | Skript sa práve odblokoval |
+| `hcc:category-enabled` | `{ category, restored }` po odblokovaní kategórie |
+
+```js
+document.addEventListener( 'hcc:category-enabled', function ( e ) {
+	if ( e.detail.category === 'marketing' && window.et_pb_map_init ) {
+		jQuery( '.et_pb_map_container' ).each( function ( i, el ) {
+			window.et_pb_map_init( jQuery( el ) );
+		} );
+	}
+} );
+```
+
+Posledný príklad je dôvod, prečo event existuje: Divi mapy sa inicializujú pri
+prvom DOM loade, keď kontajner ešte nebol vložený. Po odblokovaní treba
+inicializáciu zopakovať.
 
 ## Súhlas a jeho ukladanie
 
@@ -299,6 +378,9 @@ composer test             # PHPUnit — unit testy bez databázy
 npm install
 npm run build             # admin/ui/src → admin/ui/dist
 npm run start             # dev build s watch
+
+npm install --no-save jsdom
+node tests/js/blocker.test.mjs   # JS testy cez jsdom
 ```
 
 GitHub Actions (`.github/workflows/php.yml`) pri každom pushu na `main` spúšťa:
@@ -307,6 +389,7 @@ GitHub Actions (`.github/workflows/php.yml`) pri každom pushu na `main` spúš�
 * PHPCS — WordPress Coding Standards + PHPCompatibility
 * `composer validate --strict`
 * PHPUnit — unit testy
+* `node --check` a jsdom testy pre `blocker.js`
 
 ### Testovanie bez WordPressu
 
@@ -321,8 +404,33 @@ vendor/bin/phpunit --testdox   # s popiskami testov
 
 Kryté sú `Script_Catalog` (normalizácia, zhoda patternov, filtery),
 `Consent_Cookie` (validácia payloadu, poškodená cookie, verzie bannera),
-`Region_Resolver` (priorita zdrojov, režimy, fallback) a `hcc_get_regions()`
+`Region_Resolver` (priorita zdrojov, režimy, fallback),
+`Blocker_Config` (konfigurácia pre JS) a `hcc_get_regions()`
 (mapovanie krajín, typy súhlasu).
+
+### Testovanie JavaScriptu
+
+`blocker.js` sa testuje cez **jsdom** — reálne DOM API bez prehliadača:
+
+```bash
+npm install --no-save jsdom
+node tests/js/blocker.test.mjs
+```
+
+17 testov pokrýva blokovanie cez všetky tri režimy (serverový výstup,
+`innerHTML`, `createElement`), iframe blokovanie, longest-match, odblokovanie
+so zachovaním pôvodného `type`, custom eventy a verejné API.
+
+### Testovanie v reálnom prehliadači
+
+```js
+window.hccConsent.getBlocked();
+// [{ src: 'https://www.googletagmanager.com/gtag/js', category: 'marketing' }]
+```
+
+V DevTools v záložke Network filter `hcc` a `scripts/…` — blokované skripty
+sa nedostanú do siete. Filter `hcc_blocker_debug` na true vypíše každé
+blokovanie do konzoly.
 
 ## Licencia
 

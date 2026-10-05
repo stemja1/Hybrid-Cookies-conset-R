@@ -64,6 +64,26 @@ jobs:
       - name: Unit testy
         run: vendor/bin/phpunit
 
+  js:
+    name: JS testy (blocker)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Inštalácia závislostí
+        run: npm install --no-save --no-audit --no-fund jsdom
+
+      - name: Syntax check
+        run: node --check modules/Blocker/js/blocker.js
+
+      - name: Testy blockera
+        run: node tests/js/blocker.test.mjs
+
   composer:
     name: composer validate
     runs-on: ubuntu-latest

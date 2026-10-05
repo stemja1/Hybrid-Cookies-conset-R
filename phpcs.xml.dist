@@ -104,6 +104,20 @@
 		<exclude-pattern>/tests/*</exclude-pattern>
 	</rule>
 
+	<!--
+		Stuby kopírujú reálne názvy WordPress funkcií, aby bol produkčný
+		kód testovateľný bez zmeny. `__return_true()` a `__return_false()`
+		patria medzi ne — v produkčnom kóde sú použité ako
+		`permission_callback` v REST trasách.
+	-->
+	<rule ref="WordPress.NamingConventions.ValidFunctionName">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames">
+		<exclude-pattern>/tests/*</exclude-pattern>
+	</rule>
+
 	<!-- PHPUnit testy nepotrebujú `declare(strict_types)` kontrolu. -->
 	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
 		<exclude-pattern>/tests/*</exclude-pattern>

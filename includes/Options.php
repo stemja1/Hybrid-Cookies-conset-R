@@ -70,6 +70,10 @@ class Options {
 				'type'    => 'bool',
 				'default' => true,
 			),
+			'blocker_enabled'          => array(
+				'type'    => 'bool',
+				'default' => true,
+			),
 			'show_on_login'            => array(
 				'type'    => 'bool',
 				'default' => true,

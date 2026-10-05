@@ -254,6 +254,78 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_url_raw' ) ) {
+	/**
+	 * Stub pre `esc_url_raw()`.
+	 *
+	 * @param string $url URL.
+	 * @return string
+	 */
+	function esc_url_raw( string $url ): string {
+		$sanitized = filter_var( $url, FILTER_SANITIZE_URL );
+
+		return false === $sanitized ? '' : $sanitized;
+	}
+}
+
+if ( ! function_exists( 'esc_url' ) ) {
+	/**
+	 * Stub pre `esc_url()`.
+	 *
+	 * @param string $url URL.
+	 * @return string
+	 */
+	function esc_url( string $url ): string {
+		return htmlspecialchars( esc_url_raw( $url ), ENT_QUOTES );
+	}
+}
+
+if ( ! function_exists( 'wp_create_nonce' ) ) {
+	/**
+	 * Stub pre `wp_create_nonce()`.
+	 *
+	 * @param string $action Akcia.
+	 * @return string
+	 */
+	function wp_create_nonce( string $action = '-1' ): string {
+		return substr( md5( 'hcc-test-' . $action ), 0, 10 );
+	}
+}
+
+if ( ! function_exists( '__return_true' ) ) {
+	/**
+	 * Stub pre `__return_true()`.
+	 *
+	 * @return true
+	 */
+	function __return_true(): bool {
+		return true;
+	}
+}
+
+if ( ! function_exists( '__return_false' ) ) {
+	/**
+	 * Stub pre `__return_false()`.
+	 *
+	 * @return false
+	 */
+	function __return_false(): bool {
+		return false;
+	}
+}
+
+if ( ! function_exists( 'rest_url' ) ) {
+	/**
+	 * Stub pre `rest_url()`.
+	 *
+	 * @param string $path Cesta.
+	 * @return string
+	 */
+	function rest_url( string $path = '' ): string {
+		return 'https://example.test/wp-json/' . ltrim( $path, '/' );
+	}
+}
+
 if ( ! function_exists( 'wp_unslash' ) ) {
 	/**
 	 * Stub pre `wp_unslash()`.
