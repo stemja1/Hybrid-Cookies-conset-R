@@ -33,6 +33,20 @@ class Banner_Module extends Abstract_Module {
 	protected int $priority = 30;
 
 	/**
+	 * Repozitár bannerov.
+	 *
+	 * @var Banner_Repository|null
+	 */
+	private ?Banner_Repository $repository = null;
+
+	/**
+	 * Frontend loader.
+	 *
+	 * @var Frontend_Loader|null
+	 */
+	private ?Frontend_Loader $loader = null;
+
+	/**
 	 * Vráti slug modulu.
 	 *
 	 * @return string
@@ -56,6 +70,46 @@ class Banner_Module extends Abstract_Module {
 	 * @return void
 	 */
 	public function register(): void {
-		// TODO (Sesia 5): SSR banneru do wp_footer, inline critical CSS.
+		$this->get_loader()->register();
+
+		add_action( 'hcc_activated', array( $this, 'on_activated' ), 30 );
+	}
+
+	/**
+	 * Vytvorí predvolený banner pri aktivácii.
+	 *
+	 * Hook beží s prioritou 30, teda po `hcc_activated` na priorite 10
+	 * (kategórie) a 20 (cookies).
+	 *
+	 * @return void
+	 */
+	public function on_activated(): void {
+		$this->get_repository()->seed_default();
+	}
+
+	/**
+	 * Vráti repozitár bannerov.
+	 *
+	 * @return Banner_Repository
+	 */
+	public function get_repository(): Banner_Repository {
+		if ( null === $this->repository ) {
+			$this->repository = new Banner_Repository();
+		}
+
+		return $this->repository;
+	}
+
+	/**
+	 * Vráti frontend loader.
+	 *
+	 * @return Frontend_Loader
+	 */
+	public function get_loader(): Frontend_Loader {
+		if ( null === $this->loader ) {
+			$this->loader = new Frontend_Loader();
+		}
+
+		return $this->loader;
 	}
 }

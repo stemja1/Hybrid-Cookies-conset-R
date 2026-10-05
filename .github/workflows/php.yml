@@ -79,10 +79,15 @@ jobs:
         run: npm install --no-save --no-audit --no-fund jsdom
 
       - name: Syntax check
-        run: node --check modules/Blocker/js/blocker.js
+        run: |
+          node --check modules/Blocker/js/blocker.js
+          node --check public/js/consent-banner.js
 
       - name: Testy blockera
         run: node tests/js/blocker.test.mjs
+
+      - name: Testy bannera
+        run: node tests/js/banner.test.mjs
 
   composer:
     name: composer validate

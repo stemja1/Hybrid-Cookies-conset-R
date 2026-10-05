@@ -8,8 +8,8 @@
  * Requires PHP:      8.1
  * Author:            stemja1
  * Author URI:        https://github.com/stemja1
- * License:           GPL-2.0-or-later
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * License:           GPL-3.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       hybrid-cookies-conset-r-plus
  * Domain Path:       /languages
  *

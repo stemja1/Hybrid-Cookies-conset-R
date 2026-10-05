@@ -2,7 +2,7 @@
   "name": "stemja1/hybrid-cookies-conset-r-plus",
   "description": "Consent banner, katalog cookies a blokovanie trackovacich skriptov pre WordPress (GDPR/CCPA).",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "keywords": ["wordpress", "wordpress-plugin", "cookie", "cookie-consent", "gdpr", "banner", "consent"],
   "require": {
     "php": ">=8.1",

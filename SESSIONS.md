@@ -88,6 +88,20 @@ Cieľ: súhlas sa uloží do cookie a do lokálnej tabuľky, banner vie zistiť 
 - Action `hcc_consent_recorded` s payloadom (hook na WooCommerce proof-of-consent v budúcnosti)
 - Consent log: hash IP, žiadna čitateľná IP, žiadne UA v čitateľnej forme
 
+## Hotovo
+
+| Sesia | Stav |
+| --- | --- |
+| 1 — Infra a jadro | ✅ `97c501d` |
+| 2 — Konfigurácia a dáta | ✅ `7554d1e` |
+| 3 — Consent | ✅ `9594511` |
+| 4 — Blocker | ✅ `0ed3a9b` |
+| 5 — Banner | ✅ SSR render, 3 layouty, revoke widget |
+| 6 — REST API + admin shell | ďalšia |
+| 7 — React shell + dashboard | — |
+| 8 — React editor bannera | — |
+| 9 — Logy, i18n, finalizácia | — |
+
 **Commit:** `feat: consent cookie, lokalny log suhasov a region resolver`
 
 ---

@@ -493,8 +493,28 @@
 			headers: {
 				'X-WP-Nonce': cfg.nonce
 			}
+		} ).then( function ( response ) {
+			return response.json();
+		} ).then( function ( data ) {
+			// Všetko odblokované treba znova zablokovať — návštevník
+			// súhlas odvolal, takže skripty sa nesmú načítať.
+			GRANTED = [ 'necessary' ];
+
+			for ( var i = 0; i < blocked.length; i++ ) {
+				blockNode( blocked[ i ].node, blocked[ i ].src, blocked[ i ].category );
+			}
+
+			document.dispatchEvent( new CustomEvent( 'hcc:consent-revoked', {
+				detail: data
+			} ) );
+
+			return data;
 		} );
 	};
+
+	// Banner volá túto metódu po uložení súhlasu. Bez nej by uzly
+	// zostali zablokované, kým by sa nenačítala nová stránka.
+	window.hccConsent.applyConsent = applyConsent;
 
 	/**
 	 * Spustí sledovanie DOM.

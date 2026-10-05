@@ -56,6 +56,11 @@ includes/
 admin/
   Admin_Menu.php                   wp-admin menu + shell pre React
 
+public/
+  css/banner-critical.css           Inline v `<head>` — bez FOUC
+  css/banner.css                   Zvyšok štýlov bannera
+  js/consent-banner.js             Hydrátcia bannera (nevytvára ho od nuly)
+
 modules/
   Categories/                      Kategórie súhlasu — repository, seeder
   Cookies/                         Katalóg cookies — repository, seeder
@@ -66,7 +71,11 @@ modules/
     data/known-cookies.json        63 URL patternov
     js/blocker.js                  Auto-blocking (MutationObserver)
   Consent/                         Cookie, recorder, región, REST controller
-  Banner/                          Consent banner (Sesia 5)
+  Banner/
+    Banner_Repository.php          Konfigurácie, verzionovanie, sanitizácia
+    Banner_Renderer.php            SSR — vykreslí banner na serveri
+    Frontend_Loader.php            Enqueue, critical CSS, shortcodes
+    templates/{default,bar,box}.php  Tri layouty bannera
 
 config/                            regióny, predvolené kategórie
 assets/css/                        Admin štýly
@@ -215,6 +224,81 @@ Všetky tabuľky používajú prefix `{wp_prefix}hcc_` a sú vytvorené cez `dbD
 
 Nastavenia idú do `wp_options` s prefixom `hcc_` a sú validované cez schému
 v `Options::get_schema()`.
+
+## Consent banner
+
+### Prečo server-side render
+
+Banner sa kreslí na serveri (`wp_footer`, priorita 20) a JS ho iba
+hydrátuje. Ak by sa vykresloval až cez JS, návštevník by najprv videl stránku
+bez bannera a banner by potom „skočil" do obrazovky — presne to je FOUC, na ktorý
+sa sťažovalo na CookieYes.
+
+Štýly sú splitované na dve časti:
+
+* `banner-critical.css` — pár desiatok riadkov vložených inline do `<head>`
+  s `wp_head: 1`, aby bol banner štýlovaný už pri prvom paint-e
+* `banner.css` — zvyšok, načítaný normálne
+
+`consent-banner.js` sa načíta v päte (`$in_footer = true`) a DOM nikdy
+neprestavuje — len pripája obsluhy udalostí.
+
+### Layouty
+
+| Layout | Tvar | Kedy |
+| --- | --- | --- |
+| `default` | Obsah vľavo, tlačidlá vpravo, kategórie sa roztvoria pod nimi | Predvolený |
+| `bar` | Všetko v jednom riadku, kategórie pod nadpisom | Úzky banner, mobil |
+| `box` | Karta uprostred obrazovky | Maximálna pozornosť |
+
+Pozícia (`top` / `bottom`) a modálny režim sú nezávislé od layoutu.
+
+### Rovnocenné tlačidlá
+
+`Prijať všetko` a `Odmietnuť` majú rovnakú veľkosť, hrúbku a farebnú váhu.
+`Odmietnuť` nie je sivé ani menšie. Vyžaduje to usmernenie EDPB — banner, v ktorom
+je odmietnutie opticky menej výhodné, je dark pattern.
+
+Checkboxy sú vždy predznačkované pre *neodmietnuté* kategórie, nie
+predznačkované všetky. Kategória `necessary` je zapnutá a `disabled` — bez nej
+stránka nemá fungovať.
+
+### Verzionovanie bannera
+
+`version` sa inkrementuje pri každej zmene konfigurácie. Súhlas v cookie nesie
+verziu pri uložení. Ak používateľ zmení texty bannera, starý súhlas prestane
+platiť a banner sa zobrazí znova — inak by návštevník súhlasil s niečím iným,
+než čo vidí.
+
+### Regionálne bannery
+
+`Banner_Repository::for_region()` hľadá banner presne pre región, inak použije
+predvolený. Je možné mať iný text pre EÚ a iný pre USA — napr. v USA CCPA
+umožňuje opt-out, takže formulácia „ súhlas musíte udeliť" by bola zavádzajúca.
+
+### Shortcodes
+
+```
+[hcc_revoke_consent label="Nastavenia cookies"]
+[hcc_cookie_policy_link]
+```
+
+Prvý vykreslí plávajúce tlačidlo na odvolanie súhlasu. GDPR vyžaduje, aby cesta
+odvolania bola rovnako jednoduchá ako udelenie súhlasu — inak je súhlas
+neplatný.
+
+Druhý vypíše odkaz na stránku s cookie policy. Ak v nastaveniach nie je
+zvolená stránka, shortcode vráti prázdny string — radšej žiadny odkaz než
+odkaz na 404.
+
+### Verejné API
+
+```js
+window.hccBanner.show();          // zobraziť banner (revoke)
+window.hccBanner.hide();
+window.hccBanner.getSelection();  // ['necessary', 'statistics']
+window.hccBanner.openDetails();   // rozbaliť kategórie
+```
 
 ## Blokovanie skriptov
 
@@ -380,7 +464,7 @@ npm run build             # admin/ui/src → admin/ui/dist
 npm run start             # dev build s watch
 
 npm install --no-save jsdom
-node tests/js/blocker.test.mjs   # JS testy cez jsdom
+npm run test:js                 # testy blockera a bannera cez jsdom
 ```
 
 GitHub Actions (`.github/workflows/php.yml`) pri každom pushu na `main` spúšťa:
@@ -405,8 +489,9 @@ vendor/bin/phpunit --testdox   # s popiskami testov
 Kryté sú `Script_Catalog` (normalizácia, zhoda patternov, filtery),
 `Consent_Cookie` (validácia payloadu, poškodená cookie, verzie bannera),
 `Region_Resolver` (priorita zdrojov, režimy, fallback),
-`Blocker_Config` (konfigurácia pre JS) a `hcc_get_regions()`
-(mapovanie krajín, typy súhlasu).
+`Blocker_Config` (konfigurácia pre JS),
+`Banner_Repository` (sanitizácia farieb a textov, verzionovanie) a
+`hcc_get_regions()` (mapovanie krajín, typy súhlasu).
 
 ### Testovanie JavaScriptu
 
@@ -417,9 +502,16 @@ npm install --no-save jsdom
 node tests/js/blocker.test.mjs
 ```
 
-17 testov pokrýva blokovanie cez všetky tri režimy (serverový výstup,
-`innerHTML`, `createElement`), iframe blokovanie, longest-match, odblokovanie
-so zachovaním pôvodného `type`, custom eventy a verejné API.
+Testy `blocker.js` (17) pokrývajú blokovanie cez všetky tri režimy
+(serverový výstup, `innerHTML`, `createElement`), iframe blokovanie,
+longest-match, odblokovanie so zachovaním pôvodného `type`, custom eventy
+a verejné API.
+
+Testy `consent-banner.js` (18) načítajú **serverom vykreslený HTML** — presne
+tak, ako by sa banner objavil vo WordPresse. Kontrolujú, že `necessary` je
+zapnutý a nedá sa vyradiť, že `accept_all` odfajkuje všetko, že nonce cestuje
+v hlavičke, že blocker dostane nové kategórie, a že prázdny banner nespôsobí
+chybu.
 
 ### Testovanie v reálnom prehliadači
 
@@ -434,4 +526,4 @@ blokovanie do konzoly.
 
 ## Licencia
 
-GPL-2.0-or-later
+GPL-3.0-or-later. Plný text je v [LICENSE](LICENSE).
