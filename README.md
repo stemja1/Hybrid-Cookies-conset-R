@@ -54,7 +54,9 @@ includes/
   helpers/autoload.php             Bootstrap pre aktiváciu/deaktiváciu
 
 admin/
-  Admin_Menu.php                   wp-admin menu + shell pre React
+  Admin_Menu.php                   wp-admin menu, výber React/fallback
+  Rest_Controller.php              CRUD REST API
+  Fallback_Pages.php               PHP obrazovky pre prípad, že React build chýba
 
 public/
   css/banner-critical.css           Inline v `<head>` — bez FOUC
@@ -224,6 +226,58 @@ Všetky tabuľky používajú prefix `{wp_prefix}hcc_` a sú vytvorené cez `dbD
 
 Nastavenia idú do `wp_options` s prefixom `hcc_` a sú validované cez schému
 v `Options::get_schema()`.
+
+## REST API
+
+Namespace `hcc/v1`. **Všetky** endpointy majú `permission_callback` —
+`__return_true` nie je nikde. Čítanie ani zápis nie sú prístupné pre
+neprihláseného návštevníka.
+
+| Endpoint | Metódy | Popis |
+| --- | --- | --- |
+| `/dashboard` | `GET` | Súhrn pre dashboard |
+| `/categories` | `GET`, `POST` | Zoznam / vytvorenie |
+| `/categories/<id>` | `GET`, `PUT`, `DELETE` | Detail / aktualizácia / zmazanie |
+| `/cookies` | `GET`, `POST` | Zoznam s filtrami / vytvorenie |
+| `/cookies/<id>` | `GET`, `PUT`, `DELETE` | Detail / aktualizácia / zmazanie |
+| `/cookies/bulk-category` | `POST` | Hromadné priradenie ku kategórii |
+| `/banners` | `GET`, `POST` | Zoznam / vytvorenie |
+| `/banners/<id>` | `GET`, `PUT`, `DELETE` | Detail / aktualizácia / zmazanie |
+| `/banner-defaults` | `GET` | Predvolená konfigurácia + zoznam layoutov |
+| `/consent-logs` | `GET` | Log súhlasov, filtre, súhrn |
+| `/settings` | `GET`, `POST` | Všetky / viac naraz |
+| `/settings/<id>` | `GET`, `PUT`, `DELETE` | Detail / zmena / reset |
+| `/consent` | `GET`, `POST` | Stav súhlasu / uloženie (bez capability) |
+| `/consent/revoke` | `POST` | Odvolanie súhlasu (bez capability) |
+
+Argumenty sú typované cez `args` (napr. `per_page` je `integer` s defaultom 20),
+takže REST ich validuje predtým, než sa dostanú do repository.
+
+Consent endpointy sú jediné s `__return_true` — musia byť dostupné
+návštevníkovi, ktorý ešte nie je prihlásený. Zápis chráni `X-WP-Nonce` a
+rate limit.
+
+Export CSV ide cez `admin-post.php?action=hcc_export_consent_logs` s nonce,
+nie REST — prehliadač musí dostať súbor, nie JSON.
+
+## Admin obrazovky
+
+Plugin má dve vrstvy adminu:
+
+1. **React SPA** v `admin/ui/dist` — ak existuje `index.asset.php`, `Admin_Menu`
+   načíta build a shell dostane bootstrap dáta cez `data-hcc-bootstrap`
+   (REST URL, nonce, počiatočná trasa, prekladové reťazce).
+2. **PHP fallback** — `Fallback_Pages` vykreslí prehľad, katalóg cookies,
+   kategórie, banner, logy a nastavenia. Kým React nie je zbuildovaný,
+   plugin je plne spravovateľný. V zálohe je aj admin notice s príkazom
+   `npm run build`.
+
+`@wordpress/scripts` generuje `index.asset.php` so zoznamom závislostí —
+`Admin_Menu` ho číta, aby zoznam neduplikoval.
+
+Náhľad bannera používa **ten istý renderer** ako frontend, takže ukazuje to,
+čo návštevník naozaj uvidí. V admin CSS je banner `position: static`, inak by
+ako `position: fixed` prekryl celú administráciu.
 
 ## Consent banner
 
@@ -440,7 +494,7 @@ POST endpointy vyžadujú `X-WP-Nonce`. Akcia musí sedieť s obsahom:
 `accept_all` vždy uloží všetky kategórie, `reject_all` vždy iba `necessary`.
 Bez toho by log klamal o tom, čo návštevník urobil.
 
-Crud endpointy pre kategórie, cookies a logy prinesie Sesia 6.
+Crud endpointy sú v tabuľke vyššie.
 
 ## Súkromie a GDPR
 

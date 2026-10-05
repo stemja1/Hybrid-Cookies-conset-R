@@ -97,8 +97,8 @@ Cieľ: súhlas sa uloží do cookie a do lokálnej tabuľky, banner vie zistiť 
 | 3 — Consent | ✅ `9594511` |
 | 4 — Blocker | ✅ `0ed3a9b` |
 | 5 — Banner | ✅ SSR render, 3 layouty, revoke widget |
-| 6 — REST API + admin shell | ďalšia |
-| 7 — React shell + dashboard | — |
+| 6 — REST API + admin shell | ✅ CRUD 14 endpointov, PHP fallback obrazovky, export CSV |
+| 7 — React shell + dashboard | ďalšia |
 | 8 — React editor bannera | — |
 | 9 — Logy, i18n, finalizácia | — |
 

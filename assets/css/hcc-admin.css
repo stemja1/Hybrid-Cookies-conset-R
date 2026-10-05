@@ -1,6 +1,8 @@
 /*!
  * Hybrid Cookies conset R+ — admin štýly
- * Načítavajú sa priamo cez wp_enqueue_style, bez build kroku.
+ *
+ * Načítavajú sa priamo cez `wp_enqueue_style`, bez build kroku.
+ * React aplikácia si nesie vlastné štýly z `admin/ui/dist`.
  */
 
 .hcc-admin {
@@ -17,7 +19,106 @@
 	font-style: italic;
 }
 
-/* Odkaz na Nastavenia v zozname pluginov */
-.hcc-admin-links a {
-	margin-right: 0.5rem;
+/* ---------------------------------------------------------------------------
+ * Karty na prehľade
+ * ------------------------------------------------------------------------- */
+
+.hcc-cards {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin: 1rem 0 1.5rem;
+}
+
+.hcc-card {
+	flex: 1 1 200px;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 1rem 1.25rem;
+}
+
+.hcc-card__value {
+	font-size: 2rem;
+	font-weight: 600;
+	line-height: 1.1;
+	color: #1d2327;
+}
+
+.hcc-card__label {
+	margin-top: 0.25rem;
+	font-weight: 600;
+}
+
+.hcc-card__help {
+	margin-top: 0.25rem;
+	color: #646970;
+	font-size: 0.85rem;
+	line-height: 1.4;
+}
+
+/* ---------------------------------------------------------------------------
+ * Náhľad bannera
+ *
+ * Banner je `position: fixed` — v náhľade ho musíme prečískovať,
+ * inak by prekryl celú stránku administrácie.
+ * ------------------------------------------------------------------------- */
+
+.hcc-banner-preview {
+	position: relative;
+	border: 1px dashed #c3c4c7;
+	border-radius: 4px;
+	background: #f6f7f7;
+	padding: 1rem;
+	min-height: 180px;
+	overflow: hidden;
+}
+
+.hcc-banner-preview .hcc-banner {
+	position: static !important;
+	transform: none !important;
+	width: 100% !important;
+	max-width: none !important;
+	box-shadow: none !important;
+	border: 1px solid #dcdcde;
+}
+
+.hcc-banner-preview .hcc-banner[hidden] {
+	display: flex !important;
+	opacity: 0.5;
+}
+
+/* ---------------------------------------------------------------------------
+ * Tabuľky
+ * ------------------------------------------------------------------------- */
+
+.hcc-admin table.widefat td code {
+	font-size: 0.85em;
+}
+
+.hcc-admin .hcc-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.6;
+	background: #f0f0f1;
+	color: #3c434a;
+}
+
+.hcc-badge--necessary { background: #e7f2fb; color: #135e96; }
+.hcc-badge--functional { background: #eaf7ea; color: #1f6f1f; }
+.hcc-badge--statistics { background: #fdf3e3; color: #8a5b00; }
+.hcc-badge--marketing  { background: #fdeaea; color: #a02020; }
+
+/* ---------------------------------------------------------------------------
+ * Formuláre
+ * ------------------------------------------------------------------------- */
+
+.hcc-admin .form-table th {
+	width: 260px;
+}
+
+.hcc-admin .description {
+	max-width: 560px;
 }
