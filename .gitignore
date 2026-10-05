@@ -2,9 +2,13 @@
 /.github/CODE_STYLE.md.bak
 
 # Build artefakty
+#
+# `admin/ui/dist` je ZÁMERNE commitnutý — plugin sa inštaluje cez git
+# alebo FTP a bez buildu by React admin nefungoval. PHP fallback
+# obrazovky slúžia ako rezerva, nie ako plán.
+#
 /vendor/
 /node_modules/
-/admin/ui/dist/
 /build/
 /dist/
 /.phpunit.cache/

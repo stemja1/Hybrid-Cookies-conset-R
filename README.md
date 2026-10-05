@@ -57,6 +57,8 @@ admin/
   Admin_Menu.php                   wp-admin menu, výber React/fallback
   Rest_Controller.php              CRUD REST API
   Fallback_Pages.php               PHP obrazovky pre prípad, že React build chýba
+  ui/src/                          React zdrojový kód
+  ui/dist/                         Build — commitnutý, pozri nižšie
 
 public/
   css/banner-critical.css           Inline v `<head>` — bez FOUC
@@ -274,6 +276,15 @@ Plugin má dve vrstvy adminu:
 
 `@wordpress/scripts` generuje `index.asset.php` so zoznamom závislostí —
 `Admin_Menu` ho číta, aby zoznam neduplikoval.
+
+### Prečo je `admin/ui/dist` v gite
+
+Build je commitnutý zámerne. Plugin sa inštaluje cez git alebo FTP a bez
+buildu by React admin nefungoval — používateľ by musel na serveri spustiť
+Node.js, čo na bežnom hostingu nie je možné. PHP fallback obrazovky slúžia
+ako rezerva, nie ako plán.
+
+Pri zmene React kódu treba po `npm run build` commitnúť aj `admin/ui/dist`.
 
 Náhľad bannera používa **ten istý renderer** ako frontend, takže ukazuje to,
 čo návštevník naozaj uvidí. V admin CSS je banner `position: static`, inak by
@@ -514,12 +525,40 @@ composer lint:fix         # phpcbf — automatická oprava
 composer test             # PHPUnit — unit testy bez databázy
 
 npm install
-npm run build             # admin/ui/src → admin/ui/dist
+npm run build             # admin/ui/src → admin/ui/dist (commitnúť!)
 npm run start             # dev build s watch
+npm run lint:js           # ESLint
+npm run lint:css          # Stylelint
+npm run format            # Prettier
 
 npm install --no-save jsdom
-npm run test:js                 # testy blockera a bannera cez jsdom
+npm run test:js           # testy blockera a bannera cez jsdom
 ```
+
+### Ako `wp-scripts` voláme
+
+`@wordpress/scripts` hľadá vstup v `src/` a výstup píše do `build/`. Náš
+zdrojový kód je v `admin/ui/src`, preto používame CLI prepínače:
+
+```bash
+wp-scripts build --webpack-src-dir=admin/ui/src --output-path=admin/ui/dist
+```
+
+Vlastný `webpack.config.js` by prepísal celé `module.rules` a zrušil
+`babel-loader` — JSX by sa neparsoval. Predvolené nastavenia
+`@wordpress/scripts` sú dostatočné.
+
+### ESLint
+
+`.eslintrc.json` je vlastný, nie `plugin:@wordpress/recommended`. Ten ťahá
+`@typescript-eslint`, ktorý sa s Node 24 láme
+(`Cannot read properties of undefined (reading 'Intrinsic')`). TypeScript
+nepoužívame, takže vlastná konfigurácia je aj rýchlejšia.
+
+`react/prop-types` je vypnuté — typy sú v JSDoc komentároch, nie v
+`propTypes`. `no-var` je vypnuté pre `blocker.js` a `consent-banner.js`:
+tie bežia ako IIFE v `<head>` pred všetkým, kde by `let`/`const` mohli
+naraziť na TDZ.
 
 GitHub Actions (`.github/workflows/php.yml`) pri každom pushu na `main` spúšťa:
 

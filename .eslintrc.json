@@ -1,0 +1,68 @@
+{
+	"root": true,
+	"extends": [
+		"eslint:recommended",
+		"plugin:react/recommended",
+		"plugin:react/jsx-runtime"
+	],
+	"parserOptions": {
+		"ecmaVersion": 2022,
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
+	},
+	"env": {
+		"browser": true,
+		"es2022": true,
+		"node": true
+	},
+	"settings": {
+		"react": {
+			"version": "detect"
+		}
+	},
+	"globals": {
+		"wp": "readonly"
+	},
+	"plugins": [
+		"react"
+	],
+	"rules": {
+		"react/jsx-uses-react": "off",
+		"react/react-in-jsx-scope": "off",
+		"no-console": "warn",
+		"eqeqeq": [ "error", "always", { "null": "ignore" } ],
+		"no-var": "error",
+		"prefer-const": "warn"
+	},
+	"overrides": [
+		{
+			"files": [
+				"modules/Blocker/js/*.js",
+				"public/js/*.js"
+			],
+			"rules": {
+				"no-var": "off",
+				"no-unused-vars": [
+					"warn",
+					{ "args": "none" }
+				]
+			}
+		},
+		{
+			"files": [ "admin/ui/src/**/*.js" ],
+			"rules": {
+				"react/prop-types": "off"
+			}
+		}
+	],
+	"ignorePatterns": [
+		"node_modules/",
+		"vendor/",
+		"build/",
+		"admin/ui/dist/",
+		"tests/js/",
+		"**/*.min.js"
+	]
+}

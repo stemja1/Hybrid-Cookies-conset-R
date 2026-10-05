@@ -5,12 +5,12 @@
   "license": "GPL-3.0-or-later",
   "private": true,
   "scripts": {
-    "build": "wp-scripts build",
-    "start": "wp-scripts start",
+    "build": "wp-scripts build --webpack-src-dir=admin/ui/src --output-path=admin/ui/dist",
+    "start": "wp-scripts start --webpack-src-dir=admin/ui/src --output-path=admin/ui/dist",
     "test:js": "node tests/js/blocker.test.mjs && node tests/js/banner.test.mjs",
-    "lint:js": "wp-scripts lint-js admin/ui/src modules public",
-    "lint:css": "wp-scripts lint-style \"assets/css/**/*.css\" \"admin/ui/src/**/*.scss\"",
-    "format": "wp-scripts format admin/ui/src modules public",
+    "lint:js": "wp-scripts lint-js admin/ui/src modules/Blocker/js public/js",
+    "lint:css": "wp-scripts lint-style \"admin/ui/src/**/*.scss\" \"assets/css/*.css\" \"public/css/*.css\"",
+    "format": "wp-scripts format admin/ui/src modules/Blocker/js public/js",
     "packages-update": "wp-scripts packages-update"
   },
   "devDependencies": {

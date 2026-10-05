@@ -89,6 +89,41 @@ jobs:
       - name: Testy bannera
         run: node tests/js/banner.test.mjs
 
+  react:
+    name: React build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Inštalácia závislostí
+        run: npm ci --no-audit --no-fund
+
+      - name: ESLint
+        run: npm run lint:js
+
+      - name: Build
+        run: npm run build
+
+      - name: Kontrola, že build je commitnutý
+        run: |
+          if [ -n "$(git status --porcelain admin/ui/dist)" ]; then
+            echo "::error::admin/ui/dist nie je commitnutý — spustite npm run build."
+            git diff --stat admin/ui/dist
+            exit 1
+          fi
+
+      - name: Kontrola index.asset.php
+        run: |
+          test -f admin/ui/dist/index.asset.php
+          grep -q "wp-api-fetch" admin/ui/dist/index.asset.php
+          grep -q "wp-components" admin/ui/dist/index.asset.php
+
   composer:
     name: composer validate
     runs-on: ubuntu-latest
