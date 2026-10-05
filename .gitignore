@@ -1,0 +1,22 @@
+# Build artefakty
+vendor/
+node_modules/
+dist/
+build/
+*.zip
+*.tar.gz
+
+# Testy a reporty
+coverage/
+phpunit.xml
+.phpunit.result.cache
+phpcs.xml
+phpstan.neon
+
+# Lokálne
+*.log
+*.cache
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

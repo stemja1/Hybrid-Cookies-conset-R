@@ -1,0 +1,141 @@
+/*!
+ * Hybrid Cookies conset R+ – banner štýly
+ */
+.hcc-banner {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 99999;
+	box-sizing: border-box;
+	padding: 1rem;
+	background: #fff;
+	color: #1e1e1e;
+	border-top: 1px solid #e0e0e0;
+	box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.hcc-banner[hidden] {
+	display: none;
+}
+
+.hcc-banner--top {
+	top: 0;
+	bottom: auto;
+	border-top: 0;
+	border-bottom: 1px solid #e0e0e0;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.hcc-banner--modal {
+	top: 50%;
+	right: auto;
+	bottom: auto;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 640px;
+	width: calc(100% - 2rem);
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+}
+
+.hcc-banner__overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.45);
+	z-index: 99998;
+}
+
+.hcc-banner__inner {
+	max-width: 1200px;
+	margin: 0 auto;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.hcc-banner__content {
+	flex: 1 1 380px;
+	min-width: 280px;
+}
+
+.hcc-banner__title {
+	margin: 0 0 0.25rem;
+	font-size: 1.05rem;
+	font-weight: 600;
+}
+
+.hcc-banner__description {
+	margin: 0;
+	color: #444;
+}
+
+.hcc-banner__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	align-items: center;
+}
+
+.hcc-btn {
+	appearance: none;
+	border: 1px solid #2271b1;
+	background: #2271b1;
+	color: #fff;
+	padding: 0.55rem 1.1rem;
+	border-radius: 4px;
+	font-size: 0.95rem;
+	cursor: pointer;
+	transition: background 0.15s ease-in-out;
+}
+
+.hcc-btn:hover {
+	background: #135e96;
+}
+
+.hcc-btn--secondary {
+	background: transparent;
+	color: #2271b1;
+}
+
+.hcc-btn--secondary:hover {
+	background: #f0f6fb;
+}
+
+.hcc-btn--ghost {
+	background: transparent;
+	border-color: #999;
+	color: #333;
+}
+
+.hcc-banner__details {
+	flex: 1 1 100%;
+	border-top: 1px solid #eee;
+	padding-top: 0.75rem;
+}
+
+.hcc-banner__category {
+	display: flex;
+	gap: 0.5rem;
+	align-items: flex-start;
+	padding: 0.4rem 0;
+}
+
+.hcc-banner__category input {
+	margin-top: 0.25rem;
+}
+
+.hcc-banner__category--disabled {
+	opacity: 0.7;
+}
+
+.hcc-banner__link {
+	display: inline-block;
+	margin-top: 0.35rem;
+	font-size: 0.85rem;
+}

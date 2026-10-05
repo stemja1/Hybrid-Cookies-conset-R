@@ -1,0 +1,122 @@
+# POT-Creation-Date: 2026-10-05 12:00+0100
+# Plugin Name: Hybrid Cookies conset R+
+# Plugin URI: https://github.com/stemja1/hybrid-cookies-conset-r-plus
+# Description: Consent banner a katalóg cookies pre WordPress vrátane blokovania skriptov pred súhlasom.
+# Version: 0.1.0
+# Author: Joy
+# Author URI: https://github.com/stemja1
+# Text Domain: hybrid-cookies-conset-r-plus
+# Domain Path: /languages
+# License: GPL-2.0-or-later
+
+msgid ""
+msgstr ""
+"Project-Id-Version: Hybrid Cookies conset R+ 0.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/stemja1/hybrid-cookies-conset-r-plus/issues\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: hybrid-cookies-conset-r-plus\n"
+
+msgid "Nevyhnutné"
+msgstr ""
+
+msgid "Funkčné"
+msgstr ""
+
+msgid "Štatistické"
+msgstr ""
+
+msgid "Marketingové"
+msgstr ""
+
+msgid "Používame cookies"
+msgstr ""
+
+msgid "Používame cookies na zlepšenie webu. Môžete súhlasiť s celou sadou alebo len s vybranými kategóriami."
+msgstr ""
+
+msgid "Prijať všetko"
+msgstr ""
+
+msgid "Odmietnuť"
+msgstr ""
+
+msgid "Uložiť voľby"
+msgstr ""
+
+msgid "Nastavenia"
+msgstr ""
+
+msgid "Katalóg cookies"
+msgstr ""
+
+msgid "Prehľad"
+msgstr ""
+
+msgid "Log súhlasov"
+msgstr ""
+
+msgid "Cookies conset"
+msgstr ""
+
+msgid "Cookies"
+msgstr ""
+
+msgid "Všeobecné"
+msgstr ""
+
+msgid "Blokovanie skriptov"
+msgstr ""
+
+msgid "Súkromie a GDPR"
+msgstr ""
+
+msgid "Pokročilé"
+msgstr ""
+
+msgid "Plugin je aktívny"
+msgstr ""
+
+msgid "Vypnutím sa banner prestane zobrazovať."
+msgstr ""
+
+msgid "Pozícia bannera"
+msgstr ""
+
+msgid "Hore"
+msgstr ""
+
+msgid "Dole"
+msgstr ""
+
+msgid "Session"
+msgstr ""
+
+msgid "Áno"
+msgstr ""
+
+msgid "Nie"
+msgstr ""
+
+msgid "Upraviť"
+msgstr ""
+
+msgid "Zmazať"
+msgstr ""
+
+msgid "Zatiaľ nie sú žiadne cookies v katalógu."
+msgstr ""
+
+msgid "Zatiaľ nie je dostupný detailný prehľad."
+msgstr ""
+
+msgid "Naozaj chcete zmazať tento záznam?"
+msgstr ""
+
+msgid "Uložené."
+msgstr ""
+
+msgid "Nastala chyba."
+msgstr ""

@@ -1,0 +1,7 @@
+# Odstránenie pluginu – zvyšky, ktoré WordPress neukladá do options tabuľky
+*.log
+*.cache
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

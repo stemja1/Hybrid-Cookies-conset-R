@@ -1,0 +1,38 @@
+/*!
+ * Hybrid Cookies conset R+ – admin štýly
+ */
+.hcc-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 12px;
+	line-height: 1.6;
+	background: #eee;
+	color: #333;
+}
+
+.hcc-badge--necessary { background: #e7f2fb; color: #135e96; }
+.hcc-badge--functional { background: #eaf7ea; color: #1f6f1f; }
+.hcc-badge--statistics { background: #fdf3e3; color: #8a5b00; }
+.hcc-badge--marketing  { background: #fdeaea; color: #a02020; }
+
+.hcc-settings .form-table th {
+	width: 260px;
+}
+
+.hcc-settings .description {
+	max-width: 560px;
+}
+
+.hcc-settings textarea.code {
+	width: 100%;
+	min-height: 140px;
+	font-family: Consolas, Monaco, monospace;
+}
+
+.hcc-banner-preview {
+	border: 1px dashed #bbb;
+	border-radius: 6px;
+	padding: 1rem;
+	background: #fafafa;
+}
