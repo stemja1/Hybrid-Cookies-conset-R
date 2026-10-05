@@ -148,13 +148,13 @@ final class Plugin {
 	public function check_version(): void {
 		$stored = Options::get( 'version' );
 
-		if ( HCC_VERSION === $stored ) {
+		if ( Version::NUMBER === $stored ) {
 			return;
 		}
 
 		// Schéma sa mohla zmeniť — pre istotu ju prebehneme znova.
 		Activator::create_tables();
 
-		Options::update( 'version', HCC_VERSION );
+		Options::update( 'version', Version::NUMBER );
 	}
 }

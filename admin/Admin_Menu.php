@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace HCC\Admin;
 
 use HCC\Capabilities;
+use HCC\Version;
 use HCC\Module_Registry;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -19,13 +20,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Admin menu.
  *
- * V Sesii 1 je to len shell — stránky vykreslia placeholder. Obsah
- * stránok doplnia Ssie 6 (PHP fallback) a 7–8 (React).
+ * V Sesii 1 je to len shell â€” strĂˇnky vykreslia placeholder. Obsah
+ * strĂˇnok doplnia Ssie 6 (PHP fallback) a 7â€“8 (React).
  */
 class Admin_Menu {
 
 	/**
-	 * Hlavný slug stránky pluginu.
+	 * HlavnĂ˝ slug strĂˇnky pluginu.
 	 */
 	const PAGE_SLUG = 'hybrid-cookies';
 
@@ -37,7 +38,7 @@ class Admin_Menu {
 	private Module_Registry $registry;
 
 	/**
-	 * Konšruktor.
+	 * KonĹˇruktor.
 	 *
 	 * @param Module_Registry $registry Registry modulov.
 	 */
@@ -58,7 +59,7 @@ class Admin_Menu {
 	}
 
 	/**
-	 * Pridá hlavné menu a podmenu.
+	 * PridĂˇ hlavnĂ© menu a podmenu.
 	 *
 	 * @return void
 	 */
@@ -76,11 +77,11 @@ class Admin_Menu {
 		);
 
 		$submenus = array(
-			self::PAGE_SLUG             => __( 'Prehľad', 'hybrid-cookies-conset-r-plus' ),
+			self::PAGE_SLUG             => __( 'PrehÄľad', 'hybrid-cookies-conset-r-plus' ),
 			'hybrid-cookies-banner'     => __( 'Banner', 'hybrid-cookies-conset-r-plus' ),
-			'hybrid-cookies-categories' => __( 'Kategórie', 'hybrid-cookies-conset-r-plus' ),
+			'hybrid-cookies-categories' => __( 'KategĂłrie', 'hybrid-cookies-conset-r-plus' ),
 			'hybrid-cookies-cookies'    => __( 'Cookies', 'hybrid-cookies-conset-r-plus' ),
-			'hybrid-cookies-logs'       => __( 'Log súhlasov', 'hybrid-cookies-conset-r-plus' ),
+			'hybrid-cookies-logs'       => __( 'Log sĂşhlasov', 'hybrid-cookies-conset-r-plus' ),
 			'hybrid-cookies-settings'   => __( 'Nastavenia', 'hybrid-cookies-conset-r-plus' ),
 		);
 
@@ -97,9 +98,9 @@ class Admin_Menu {
 	}
 
 	/**
-	 * Načíta admin assety.
+	 * NaÄŤĂ­ta admin assety.
 	 *
-	 * @param string $hook Aktuálna admin stránka.
+	 * @param string $hook AktuĂˇlna admin strĂˇnka.
 	 * @return void
 	 */
 	public function enqueue_assets( string $hook = '' ): void {
@@ -107,18 +108,18 @@ class Admin_Menu {
 			return;
 		}
 
-		// TODO (Sesia 7): načítať `admin/ui/dist/index.asset.php` z build-u
-		// @wordpress/scripts. Kým build neexistuje, admin CSS nahrávame ručne.
+		// TODO (Sesia 7): naÄŤĂ­taĹĄ `admin/ui/dist/index.asset.php` z build-u
+		// @wordpress/scripts. KĂ˝m build neexistuje, admin CSS nahrĂˇvame ruÄŤne.
 		wp_enqueue_style(
 			'hcc-admin',
 			HCC_PLUGIN_URL . 'assets/css/hcc-admin.css',
 			array(),
-			HCC_VERSION
+			Version::NUMBER
 		);
 	}
 
 	/**
-	 * Pridá odporúčanie v zozname pluginov.
+	 * PridĂˇ odporĂşÄŤanie v zozname pluginov.
 	 *
 	 * @param array<int,string> $links Odkazy.
 	 * @return array<int,string>
@@ -132,27 +133,27 @@ class Admin_Menu {
 	}
 
 	/**
-	 * Vykreslí shell pre React aplikáciu.
+	 * VykreslĂ­ shell pre React aplikĂˇciu.
 	 *
 	 * @return void
 	 */
 	public function render_app_shell(): void {
 		if ( ! Capabilities::current_user_can_manage() ) {
-			wp_die( esc_html__( 'Nemáte oprávnenie na prístup k tejto stránke.', 'hybrid-cookies-conset-r-plus' ) );
+			wp_die( esc_html__( 'NemĂˇte oprĂˇvnenie na prĂ­stup k tejto strĂˇnke.', 'hybrid-cookies-conset-r-plus' ) );
 		}
 
 		$bootstrap = array(
-			'version'  => HCC_VERSION,
+			'version'  => Version::NUMBER,
 			'restUrl'  => esc_url_raw( rest_url( 'hcc/v1/' ) ),
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
 			'pageSlug' => self::PAGE_SLUG,
 			'modules'  => $this->registry->get_slugs(),
 			'submenus' => array(
-				'dashboard'  => __( 'Prehľad', 'hybrid-cookies-conset-r-plus' ),
+				'dashboard'  => __( 'PrehÄľad', 'hybrid-cookies-conset-r-plus' ),
 				'banner'     => __( 'Banner', 'hybrid-cookies-conset-r-plus' ),
-				'categories' => __( 'Kategórie', 'hybrid-cookies-conset-r-plus' ),
+				'categories' => __( 'KategĂłrie', 'hybrid-cookies-conset-r-plus' ),
 				'cookies'    => __( 'Cookies', 'hybrid-cookies-conset-r-plus' ),
-				'logs'       => __( 'Log súhlasov', 'hybrid-cookies-conset-r-plus' ),
+				'logs'       => __( 'Log sĂşhlasov', 'hybrid-cookies-conset-r-plus' ),
 				'settings'   => __( 'Nastavenia', 'hybrid-cookies-conset-r-plus' ),
 			),
 		);
@@ -165,7 +166,7 @@ class Admin_Menu {
 				data-hcc-bootstrap="<?php echo esc_attr( wp_json_encode( $bootstrap ) ); ?>"
 			>
 				<p class="hcc-app__loading">
-					<?php esc_html_e( 'Načítavam…', 'hybrid-cookies-conset-r-plus' ); ?>
+					<?php esc_html_e( 'NaÄŤĂ­tavamâ€¦', 'hybrid-cookies-conset-r-plus' ); ?>
 				</p>
 			</div>
 		</div>
@@ -173,7 +174,7 @@ class Admin_Menu {
 	}
 
 	/**
-	 * Upozorní na moduly, ktoré sa nepodarilo načítať.
+	 * UpozornĂ­ na moduly, ktorĂ© sa nepodarilo naÄŤĂ­taĹĄ.
 	 *
 	 * @return void
 	 */
@@ -185,7 +186,7 @@ class Admin_Menu {
 		}
 
 		echo '<div class="notice notice-error"><p><strong>';
-		esc_html_e( 'Niektoré moduly pluginu sa nepodarilo načítať:', 'hybrid-cookies-conset-r-plus' );
+		esc_html_e( 'NiektorĂ© moduly pluginu sa nepodarilo naÄŤĂ­taĹĄ:', 'hybrid-cookies-conset-r-plus' );
 		echo '</strong></p><ul style="list-style:disc;margin-left:20px">';
 
 		foreach ( $failed as $slug => $reason ) {

@@ -29,7 +29,7 @@ class Activator {
 		Options::seed_defaults();
 		Capabilities::add();
 
-		Options::update( 'version', HCC_VERSION );
+		Options::update( 'version', Version::NUMBER );
 
 		set_transient( 'hcc_activation_redirect', true, 60 );
 

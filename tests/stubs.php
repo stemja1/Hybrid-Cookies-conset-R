@@ -254,6 +254,48 @@ if ( ! function_exists( 'sanitize_key' ) ) {
 	}
 }
 
+if ( ! function_exists( 'wp_unslash' ) ) {
+	/**
+	 * Stub pre `wp_unslash()`.
+	 *
+	 * @param mixed $value Hodnota.
+	 * @return mixed
+	 */
+	function wp_unslash( $value ) {
+		if ( is_array( $value ) ) {
+			return array_map( 'wp_unslash', $value );
+		}
+
+		return is_string( $value ) ? stripslashes( $value ) : $value;
+	}
+}
+
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	/**
+	 * Stub pre `wp_json_encode()`.
+	 *
+	 * @param mixed $data  Dáta.
+	 * @param int   $flags Flags.
+	 * @return string|false
+	 */
+	function wp_json_encode( $data, int $flags = 0 ) {
+		return json_encode( $data, $flags );
+	}
+}
+
+if ( ! function_exists( 'wp_parse_args' ) ) {
+	/**
+	 * Stub pre `wp_parse_args()`.
+	 *
+	 * @param array<string,mixed> $args     Argumenty.
+	 * @param array<string,mixed> $defaults Predvolené hodnoty.
+	 * @return array<string,mixed>
+	 */
+	function wp_parse_args( array $args, array $defaults = array() ): array {
+		return array_merge( $defaults, $args );
+	}
+}
+
 if ( ! function_exists( 'sanitize_text_field' ) ) {
 	/**
 	 * Stub pre `sanitize_text_field()`.

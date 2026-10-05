@@ -87,6 +87,12 @@
 
 	<rule ref="WordPress.DB.PreparedSQL">
 		<exclude-pattern>*/modules/*Repository.php</exclude-pattern>
+		<exclude-pattern>*/modules/*Recorder.php</exclude-pattern>
+	</rule>
+
+	<!-- Recorder robí len `DELETE` pri čistení logov — je to jediný dotaz. -->
+	<rule ref="WordPress.DB.DirectDatabaseQuery">
+		<exclude-pattern>*/modules/*Recorder.php</exclude-pattern>
 	</rule>
 
 	<!-- Testy používajú vlastné stuby WordPress funkcií. -->

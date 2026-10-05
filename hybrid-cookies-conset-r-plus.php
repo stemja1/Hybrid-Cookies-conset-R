@@ -23,8 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'HCC_VERSION', '0.1.0' );
-define( 'HCC_MIN_PHP', '8.1' );
+require_once __DIR__ . '/includes/Version.php';
+
+// Konštanty pre kompatibilitu s inými kódmi, ktoré očakávajú
+// `HCC_VERSION`. Zdroj pravdy je `HCC\Version`.
+define( 'HCC_VERSION', HCC\Version::NUMBER );
+define( 'HCC_MIN_PHP', HCC\Version::MIN_PHP );
 define( 'HCC_PLUGIN_FILE', __FILE__ );
 define( 'HCC_PLUGIN_DIR', __DIR__ );
 define( 'HCC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

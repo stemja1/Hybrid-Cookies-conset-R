@@ -45,6 +45,7 @@ includes/
   Module_Registry.php              Načítanie, zoradenie podľa priority, prístup
   Options.php                      Typovaný wrapper nad wp_options + schéma
   Tables.php                       Názvy tabuliek a SQL schéma
+  Version.php                      Jediný zdroj pravdy o verzii
   Capabilities.php                 Capability manage_hybrid_cookies
   Activator.php                    dbDelta, seedovanie
   Deactivator.php                  Čistenie transientov
@@ -56,11 +57,11 @@ admin/
   Admin_Menu.php                   wp-admin menu + shell pre React
 
 modules/
-  Categories/                      Kategórie súhlasu
-  Cookies/                         Katalóg cookies
-  Blocker/                         Blokovanie skriptov
-  Consent/                         Súhlas a logy
-  Banner/                          Consent banner
+  Categories/                      Kategórie súhlasu — repository, seeder
+  Cookies/                         Katalóg cookies — repository, seeder
+  Blocker/                         Katalóg poskytovateľov skriptov
+  Consent/                         Cookie, recorder, región, REST controller
+  Banner/                          Consent banner (Sesia 5)
 
 config/                            regióny, predvolené kategórie
 assets/css/                        Admin štýly
@@ -109,7 +110,9 @@ Priority (`$priority`) určuje poradie načítania — čím nižšie, tým skô
 | `hcc_loaded` | Všetky moduly sú načítané |
 | `hcc_activated` | Plugin bol aktivovaný |
 | `hcc_deactivated` | Plugin bol deaktivovaný |
-| `hcc_consent_recorded` | Návštevník udelil súhlas (payload: uuid, kategórie, akcia) |
+| `hcc_consent_recorded` | Návštevník udelil súhlas (uuid, riadok v tabuľke, payload) |
+| `hcc_frontend_consent_saved` | Súhlas uložený z frontendu (payload, uuid) |
+| `hcc_region_resolved` | Určený región (efektívny, pred filtrom, krajina) |
 | `hcc_before_block` | Skript sa blokuje |
 | `hcc_after_unblock` | Skript sa odblokoval |
 | `hcc_cookie_updated` | Katalóg cookies sa zmenil |
@@ -124,6 +127,11 @@ Priority (`$priority`) určuje poradie načítania — čím nižšie, tým skô
 | `hcc_options_schema` | Schéma nastavení |
 | `hcc_script_providers` | Zoznam poskytovateľov skriptov a ich kategórií |
 | `hcc_regions` | Mapa krajina → región → typ súhlasu |
+| `hcc_region_definitions` | Definície regiónov |
+| `hcc_region_resolved` | Prepísanie určeného regiónu |
+| `hcc_geoip_country` | Kód krajiny z GeoIP (predvolene sa nepoužíva) |
+| `hcc_region_to_country` | Namapovanie regiónu na krajinu pre režim `manual` |
+| `hcc_consent_expiry_days` | Doba platnosti cookie súhlasu |
 | `hcc_locale` | Prepnutie locale |
 
 Príklad doplnenia vlastného poskytovateľa:
@@ -203,15 +211,82 @@ Všetky tabuľky používajú prefix `{wp_prefix}hcc_` a sú vytvorené cez `dbD
 Nastavenia idú do `wp_options` s prefixom `hcc_` a sú validované cez schému
 v `Options::get_schema()`.
 
-## Súkromie a GDPR
+## Súhlas a jeho ukladanie
 
-* IP adresa sa **nikdy** neukladá v čitateľnej forme — iba SHA-256 hash
-  s `wp_salt()`.
+### Cookie `hcc_consent`
+
+Payload je base64(JSON) — čitateľný v JS bez dešifrovania, zároveň neprezrádza
+nič, čo by sa dalo zneužiť. `HttpOnly = false`, pretože frontend JS musí vedieť
+stav súhlasu ešte pred načítaním REST.
+
+```json
+{
+  "uuid": "…",
+  "categories": ["necessary", "statistics"],
+  "given": true,
+  "t": 1767225600,
+  "bv": 1
+}
+```
+
+Dôležité pravidlá:
+
+* `necessary` je vždy prítomná a vždy súhlasná — bez nej by stránka nemala
+  fungovať. Nie je to voľba návštevníka.
+* Bez uloženého súhlasu je súhlasná **iba** `necessary`. Súhlas musí byť
+  udelený pred spracovaním, nie potom.
+* Ak používateľ zmení texty bannera, `version` (`bv`) sa inkrementuje a starý
+  súhlas prestane platiť. Bez toho by návštevník súhlasil s niečím iným,
+  než čo vidí.
+
+### Tabuľka `hcc_consent_logs`
+
+Dôkaz o súhlase pre GDPR. Prístupný cez REST na admine, na frontende nie.
+
+* IP adresa sa **nikdy** neukladá v čitateľnej forme. Ukladá sa iba
+  SHA-256 hash so `wp_salt('nonce')` — z neho sa nedá IP získať späť,
+  ale dá sa overiť, že ide o toho istého návštevníka.
 * User agent sa tiež ukladá iba ako hash.
+* Akcie sú `accept_all`, `reject_all`, `custom`.
+* Retention defaultne 365 dní, denné čistenie cez `wp_schedule_event()`.
+  Konfigurátelné cez `hcc_log_retention_days` (0 = bez mazania).
 * Tabuľky prežijú deaktiváciu pluginu. Pri odinštalácii sa mažú **len** vtedy,
   keď je v nastaveniach zapnuté `delete_data_on_uninstall`.
+
+### Odvolanie súhlasu
+
+`POST /hcc/v1/consent/revoke` zmaže cookie a zapíše záznam s `given = false`.
+GDPR vyžaduje, aby cesta odvolania bola rovnako jednoduchá ako udelenie
+súhlasu.
+
+### Rate limit
+
+`POST /hcc/v1/consent` je obmedzený na 10 požiadaviek za minútu na IP
+(konfigurátelné cez `rate_limit_per_min`). Bez limitu by bot mohol zapĺňať
+tabuľku logov. Identifikátorom je hash IP, nie IP samotná.
+
+## REST API (consent)
+
+| Endpoint | Metóda | Popis |
+| --- | --- | --- |
+| `/hcc/v1/consent` | `GET` | Aktuálny stav súhlasu, región, zákon |
+| `/hcc/v1/consent` | `POST` | Uloží súhlas |
+| `/hcc/v1/consent/revoke` | `POST` | Odvolá súhlas |
+
+POST endpointy vyžadujú `X-WP-Nonce`. Akcia musí sedieť s obsahom:
+`accept_all` vždy uloží všetky kategórie, `reject_all` vždy iba `necessary`.
+Bez toho by log klamal o tom, čo návštevník urobil.
+
+Crud endpointy pre kategórie, cookies a logy prinesie Sesia 6.
+
+## Súkromie a GDPR
+
 * Tlačidlá "Prijať všetko" a "Odmietnuť" majú rovnakú vizuálnu váhu
   (požiadavka EDPB).
+* Žiadne predznačkované políčka, žiadne skryté tlačidlá.
+* Plugin nikdy nevolá externé API na detekciu regiónu — predvolene sa
+  spolieha len na `Accept-Language`. GeoIP je voliteľný cez filter
+  `hcc_geoip_country`.
 
 ## Vývoj
 
@@ -244,8 +319,10 @@ vendor/bin/phpunit              # všetky testy
 vendor/bin/phpunit --testdox   # s popiskami testov
 ```
 
-Kryté sú `Script_Catalog` (normalizácia, zhoda patternov, filtery) a
-`hcc_get_regions()` (mapovanie krajín, typy súhlasu).
+Kryté sú `Script_Catalog` (normalizácia, zhoda patternov, filtery),
+`Consent_Cookie` (validácia payloadu, poškodená cookie, verzie bannera),
+`Region_Resolver` (priorita zdrojov, režimy, fallback) a `hcc_get_regions()`
+(mapovanie krajín, typy súhlasu).
 
 ## Licencia
 

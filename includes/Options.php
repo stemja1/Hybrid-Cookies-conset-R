@@ -88,7 +88,7 @@ class Options {
 			),
 			'version'                  => array(
 				'type'    => 'string',
-				'default' => HCC_VERSION,
+				'default' => Version::NUMBER,
 			),
 		);
 
