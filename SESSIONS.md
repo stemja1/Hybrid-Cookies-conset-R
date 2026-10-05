@@ -205,10 +205,51 @@ Cieľ: plugin je pripravený na release.
 | CCPA „Do Not Sell/Share" modul | Final |
 | Viac jazykov (WPML) | mimo plánu |
 
-## Prerepodmienky pred Sesiou 1
+## Prerepodmienky — stav
 
-1. **PHP 8.1+ CLI** na tomto stroji (momentálne `php` nie je v PATH) — na lint a na Composer.
-2. **Composer** — `composer install` pred prvým pushom, aby `vendor/` bol commitnutý.
-3. **GitHub repozitár** `stemja1/Hybrid-Cookies-conset-R` + SSH kľúč alebo PAT (momentálne `ssh -T git@github.com` = *Permission denied (publickey)*, `gh` CLI nie je nainštalované).
+| # | Potreba | Stav |
+| --- | --- | --- |
+| 1 | PHP 8.1+ CLI | ✅ PHP 8.3.33 (winget, `PHP.PHP.8.3`), `php.ini` nakonfigurovaný: curl, mbstring, zip, openssl, gd, intl, mysqli, pdo_mysql, sodium, exif, fileinfo, sockets, soap, opcache |
+| 2 | Composer | ✅ 2.10.3 (`%ProgramData%\ComposerSetup\composer.phar` + `composer.bat` v `%APPDATA%\Composer\bin`, PATH doplnený) |
+| 3 | GitHub SSH | ⚠️ Kľúč vygenerovaný, treba ho pridať na GitHub — pozri nižšie |
 
-Bez prvých dvoch bodov sa kód dá písať, ale nedá sa spustiť lint ani `composer install`. Tretí bod je potrebný až pri pushi.
+### GitHub — čo treba urobiť ty
+
+Nový kľúč bol vygenerovaný na `C:\Users\Joy\.ssh\id_ed25519_github_ai_dubbing`.
+Pridaj **verejný** kľúč na GitHub:
+
+1. GitHub → **Settings** → **SSH and GPG keys** → **New SSH key**
+2. Title: `h7enpvp-ai-dubbing` (alebo `windows-hybrid-cookies`)
+3. Key (skopíruj celý jeden riadok):
+
+```
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHG2oxk6JnfW5KNEX18Yoll237/rIfrt31ksAJ1F6X2n stemja1@windows-hybrid-cookies
+```
+
+4. Fingerprint nového kľúča (musí sedieť po pridaní):
+
+```
+SHA256:ZcYGj+ffgTd17uuJF16a76LrL/XgXxEphAv/eflmsBQ
+```
+
+Overenie po pridaní: `ssh -T git@github.com` má vrátiť
+`Hi stemja1! You've successfully authenticated...`
+
+### Repozytoár
+
+Vzdialený repozitár ešte neexistuje. Vytvorenie: **New repo** na GitHub,
+názov `Hybrid-Cookies-conset-R`, prázdny (bez README), viditeľnosť podľa potreby.
+Príkaz na pripojenie remote:
+
+```powershell
+git remote add origin git@github.com:stemja1/Hybrid-Cookies-conset-R.git
+```
+
+### `vendor/` v gite
+
+`.gitignore` obsahuje `vendor/`, takže `vendor/` sa **necommituje**. Plugin v
+produkcii nemá žiadnu runtime závislosť (žiadny PSR-4 z `vendor/`, iba dev
+nástroje: phpcs, phpunit, wpcs). Pri nasadení na WordPress sa teda nič
+nesťahuje okrem `vendor/autoload.php` — a ten je v `require` podmienený
+fallbackom na jednoduchý interný autoloader. Vďaka tomu je plugin nasaditeľný
+aj bez Composera na serveri.
